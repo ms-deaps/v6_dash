@@ -3,55 +3,1386 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monitoramento e Controle | Ministério da Saúde</title>
+  <title>Painel Redmine | Versão 6</title>
   <style>
-    :root{--blue:#2563eb;--cyan:#0891b2;--green:#15803d;--ink:#172033;--muted:#667085;--line:#d8e2ef;--bg:#f4f7fb;--shadow:0 14px 36px rgba(15,23,42,.08);}
+    :root{
+      --bg:#f3f6fa;--surface:#ffffff;--surface-2:#f8fafc;--ink:#172033;--muted:#667085;--line:#d8e2ef;
+      --blue:#2477a8;--blue-2:#36a1cf;--green:#5aaa78;--teal:#4b9c95;--red:#e05a5a;--amber:#d99a2b;--navy:#12345a;
+      --shadow:0 14px 32px rgba(20,31,51,.08);
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    .page{max-width:1280px;margin:0 auto;padding:24px}
-    .hero{background:linear-gradient(135deg,#082f49 0%,#0f4c81 52%,#0ea5e9 100%);color:#fff;border-radius:30px;padding:30px 32px;box-shadow:var(--shadow)}
-    .brand{font-size:12px;text-transform:uppercase;letter-spacing:.18em;font-weight:800;opacity:.92}
-    h1{font-family:Montserrat,Arial,sans-serif;font-size:clamp(34px,4vw,58px);margin:14px 0 10px;line-height:1.02;max-width:820px}
-    .lead{margin:0;max-width:980px;line-height:1.75;font-size:17px;opacity:.95}
-    .coord-nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-    .coord-chip{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 18px;border-radius:6px;background:#e6f4f1;border:1px solid #a7d8ce;color:#164e46;text-decoration:none;font-size:16px;font-weight:800;line-height:1;transition:transform .15s ease, background .15s ease}
-    .coord-chip:hover{transform:translateY(-1px);background:rgba(255,255,255,.2)}
-    .section-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;margin-top:22px}
-    .section-head h2{font-family:Montserrat,Arial,sans-serif;color:#12345a;font-size:28px;margin:0}
-    .section-head p{margin:0;color:#475569;line-height:1.6;max-width:900px}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
-    .coord-card{display:flex;min-height:198px;flex-direction:column;gap:10px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:22px;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .15s ease, box-shadow .15s ease,border-color .15s ease}
-    .coord-card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(15,23,42,.12);border-color:#b8d3ec}
-    .coord-card span{display:inline-flex;width:max-content;font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#8a4b10;background:#fff3dc;border-radius:4px;padding:8px 12px}
-    .coord-card strong{font-family:Montserrat,Arial,sans-serif;margin:2px 0 0;color:#12345a;font-size:24px}
-    .coord-card small{display:block;margin:0;line-height:1.6;color:#475569}
-    .footer{margin-top:22px;color:#64748b;font-size:12px;text-align:center}
-    @media(max-width:960px){.grid{grid-template-columns:1fr}.page{padding:14px}.hero{padding:22px}.section-head{align-items:flex-start;flex-direction:column}}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}
+    button,input,select{font:inherit}
+    .app{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh}
+    aside{position:sticky;top:0;height:100vh;overflow:auto;background:#eef2f7;border-right:1px solid var(--line);padding:18px 14px}
+    .version-switcher{display:flex;align-items:center;gap:3px;width:max-content;margin:0 0 12px;padding:3px;border:1px solid #cbd5e1;border-radius:6px;background:#e5eaf0}
+    .version-label{padding:0 7px;color:#667085;font-size:9px;font-weight:800;line-height:1;letter-spacing:.06em}
+    .version-link{display:inline-flex;align-items:center;justify-content:center;min-width:38px;min-height:30px;padding:0 8px;border:1px solid transparent;border-radius:4px;background:transparent;color:#475569;font-size:12px;font-weight:800;line-height:1;text-decoration:none;transition:background .15s ease,color .15s ease,border-color .15s ease,box-shadow .15s ease}
+    .version-link:hover{border-color:#b9c6d2;background:#f8fafc;color:#164e46;text-decoration:none}
+    .version-link.active{border-color:#164e46;background:#164e46;color:#fff;box-shadow:0 1px 2px rgba(22,78,70,.2)}
+    .version-link.active:hover{border-color:#123f38;background:#123f38;color:#fff}
+    .version-link:focus-visible{outline:2px solid #2477a8;outline-offset:2px}
+    .filter-title{display:flex;align-items:center;gap:8px;font-size:20px;color:#3b4658;margin:0 0 16px}
+    .filter-group{border:0;border-top:1px solid #d4deeb;margin:0 0 14px;padding:12px 0 0}
+    .filter-group legend{font-size:13px;font-weight:800;color:#334155;padding-right:8px}
+    .filter-group-actions{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
+    .filter-actions{display:flex;gap:6px;margin:10px 0 16px}
+    .mini-btn,.icon-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:#334155;border-radius:8px;min-height:34px;padding:0 12px;font-size:13px;font-weight:700;cursor:pointer;transition:border-color .18s,background .18s,color .18s}
+    .icon-btn svg{flex-shrink:0}
+    .filter-group-actions .mini-btn{min-height:28px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.1;box-shadow:none}
+    .filter-actions .mini-btn{min-height:28px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.1;box-shadow:none;white-space:nowrap}
+    .mini-btn:hover,.icon-btn:hover{border-color:#9dc5de;background:#f0f7ff;color:#2477a8}
+    .check-list{display:grid;gap:6px;max-height:168px;overflow:auto;padding-right:2px}
+    .check-list label{display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px;align-items:start;background:#fff;border:1px solid #dde6f2;border-radius:6px;padding:8px;color:#334155;font-size:13px;line-height:1.25}
+    .check-list input{margin-top:1px;accent-color:var(--blue)}
+    main{min-width:0;padding:18px}
+    .topbar{position:sticky;top:0;z-index:12;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;padding:14px 16px;border:1px solid #bfd5ea;border-radius:0 0 16px 16px;background:#f4f8fd;box-shadow:0 12px 28px rgba(20,31,51,.08);overflow:hidden}
+    .crumb{font-size:12px;color:#5f7190;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+    h1{margin:3px 0 5px;font-size:30px;color:#123f73;letter-spacing:0}
+    .lead{margin:0;color:#5f7190;line-height:1.55;max-width:980px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start}
+    .coord-switcher{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .coord-chip{display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border-radius:999px;background:#eef6ff;border:1px solid #c9dbed;color:#17385d;text-decoration:none;font-size:16px;font-weight:800;line-height:1}
+    button.coord-chip{cursor:pointer;font:inherit}
+    .coord-chip.active{background:#17385d;color:#fff;border-color:#17385d}
+    .dashboard{display:grid;gap:16px}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .kpi{border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow);padding:16px;display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:start;cursor:pointer;min-height:112px;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease}
+    .kpi:hover{border-color:#9cc7e9}
+    .kpi:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(20,31,51,.12)}
+    .kpi .icon{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.24)}
+    .kpi strong{display:block;font-size:28px;color:var(--navy);line-height:1}
+    .kpi span{display:block;margin-top:6px;font-size:14px;font-weight:800;color:#344054;line-height:1.25}
+    .kpi small{display:block;margin-top:6px;font-size:12px;line-height:1.35;color:var(--muted)}
+    .tone-blue .icon{background:var(--blue)}.tone-green .icon{background:var(--green)}.tone-red .icon{background:var(--red)}.tone-teal .icon{background:var(--teal)}.tone-amber .icon{background:var(--amber)}
+    .tone-red{background:#fff6f6}.tone-green{background:#f5fbf7}.tone-teal{background:#f4fbfb}.tone-blue{background:#f6fbff}.tone-amber{background:#fef9f3}
+    .grid-3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+    .grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+    .grid-2 > *, .grid-3 > *{min-width:0}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:14px;min-width:0}
+    .card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+    .card h2{margin:0;font-size:19px;color:#24364d;letter-spacing:0}
+    .card h3{margin:0;font-size:16px;color:#24364d;letter-spacing:0}
+    .chart{width:100%;min-height:250px}
+    .chart.tall{min-height:380px}
+    .chart.scroll-chart{max-height:380px;overflow-y:auto}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;color:#475569;font-size:13px;margin-top:8px}
+    .legend span{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sprint-legend{justify-content:center;color:#475569;margin-top:12px}
+    .sprint-legend span{font-size:13px;color:#475569}
+    .dot{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px;flex-shrink:0}
+    .empty{display:grid;place-items:center;min-height:180px;color:var(--muted);border:1px dashed var(--line);border-radius:8px;background:var(--surface-2);text-align:center;padding:18px}
+    .table-wrap{max-height:600px;overflow:auto;border:1px solid var(--line);border-radius:8px;min-width:0}
+    table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:640px}
+    th{position:sticky;top:0;background:#eef5fb;color:#24364d;text-align:left;padding:10px;border-bottom:1px solid var(--line);z-index:1;white-space:nowrap}
+    td{padding:9px 10px;border-bottom:1px solid #edf2f7;vertical-align:top;word-break:break-word;overflow-wrap:anywhere}
+    tr:hover td{background:#f8fbff}
+    a{color:#176fa3;font-weight:800;text-decoration:none}a:hover{text-decoration:underline}
+    .note{color:var(--muted);font-size:12px;line-height:1.45}
+    .modal{position:fixed;inset:0;background:rgba(15,23,42,.42);display:none;align-items:flex-start;justify-content:center;padding:26px;z-index:20}
+    .modal.open{display:flex}
+    .modal-panel{width:min(1120px,100%);max-height:calc(100vh - 52px);overflow:auto;background:#fff;border-radius:8px;box-shadow:0 24px 80px rgba(15,23,42,.28)}
+    .modal-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:2}
+    .modal-head h2{margin:0;font-size:20px;color:var(--navy)}
+    .modal-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+    #modal-close{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:none;border-radius:50%;background:transparent;color:#64748b;cursor:pointer;transition:background .18s,color .18s,transform .15s}
+    #modal-close:hover{background:#fee2e2;color:#dc2626;transform:scale(1.12)}
+    #modal-close svg{display:block;pointer-events:none}
+    .modal-body{padding:14px}
+    .tooltip{position:fixed;pointer-events:none;display:none;background:#172033;color:#fff;border-radius:6px;padding:7px 9px;font-size:12px;box-shadow:0 10px 28px rgba(0,0,0,.18);z-index:30;max-width:260px}
+    .status-pill{display:inline-block;border-radius:999px;padding:3px 8px;background:#eef2f7;color:#334155;font-weight:700;font-size:12px}
+    .status-pill.red{background:#fee2e2;color:#991b1b}.status-pill.green{background:#dcfce7;color:#166534}.status-pill.blue{background:#e0f2fe;color:#075985}
+    @media(max-width:1366px){.app{grid-template-columns:220px minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3,.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar{padding:12px 14px}.card-head{align-items:flex-start;flex-direction:column}}
+    @media(max-width:1100px){.app{grid-template-columns:1fr}aside{position:relative;height:auto}.grid-3,.grid-2{grid-template-columns:1fr}main{padding:12px}}
+    @media(max-width:720px){.topbar{align-items:flex-start;flex-direction:column}.toolbar{justify-content:flex-start}.kpi{grid-template-columns:36px 1fr}.kpi .icon{width:36px;height:36px}.modal{padding:8px}h1{font-size:24px}}
+    @media print{
+      body{background:#fff}aside,.topbar,.toolbar,.modal-head .modal-actions,.filter-actions{display:none!important}
+      .app{display:block}main{padding:0}.modal{position:static;display:block;background:#fff;padding:0}.modal-panel{box-shadow:none;max-height:none;width:100%}
+      body.printing-dashboard .modal{display:none!important} body.printing-list main>.dashboard, body.printing-list main>.topbar{display:none!important}
+      .card,.kpi{box-shadow:none;break-inside:avoid} th{position:static}
+      .table-wrap{max-height:none!important;overflow:visible!important;border:none}
+      table{break-inside:auto}tr{break-inside:avoid;break-after:auto}thead{display:table-header-group}
+    }
   </style>
 </head>
 <body>
-  <main class="page">
-    <header class="hero">
-      <div class="brand">Ministério da Saúde | Monitoramento e Controle</div>
-      <h1>Painéis Redmine versões 4 e 6</h1>
-      <p class="lead">Selecione a instância Redmine que deseja consultar.</p>
-      <nav class="coord-nav" aria-label="Versões do Redmine">
-        <a class="coord-chip" href="painel_redmine_v4_site/index.html">Redmine versão 4</a><a class="coord-chip" href="painel_redmine_v6_site/index.html">Redmine versão 6</a>
-      </nav>
-    </header>
-
-    <div class="section-head">
-      <div>
-        <h2>Escolha uma versão</h2>
-        <p>Cada painel apresenta os dados da respectiva instância do Redmine.</p>
+  <div class="app">
+    <aside>
+      <nav class="version-switcher" aria-label="Versão do Redmine"><span class="version-label">VERSÃO</span><a class="version-link" href="painel_redmine_v4_site/index.html" title="Abrir painel Redmine versão 4" aria-label="Painel Redmine versão 4">v4</a><a class="version-link active" href="index.html" title="Abrir painel Redmine versão 6" aria-label="Painel Redmine versão 6">v6</a></nav>
+      <h2 class="filter-title" aria-label="Filtros"><span aria-hidden="true">▽</span> Filtros</h2>
+      <div class="filter-actions">
+        <button class="mini-btn" id="apply-defaults" type="button">Selecionar tudo</button>
+        <button class="mini-btn" id="clear-filters" type="button">Limpar tudo</button>
       </div>
+      <form id="filters"></form>
+    </aside>
+    <main>
+      <div class="topbar">
+        <div>
+          <div class="crumb">Ministério da Saúde | Redmine 6 | Gerenciamento de Tarefas</div>
+          <h1>Monitoramento e Controle</h1>
+          <p class="lead">Painel de monitoramento dos dados da instância Redmine versão 6.</p>
+          <nav class="coord-switcher" id="project-nav" aria-label="Coordenações disponíveis"></nav>
+        </div>
+        <div class="toolbar">
+          <button class="icon-btn" id="download-filtered" type="button" title="Baixar CSV dos dados filtrados">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+          <button class="icon-btn" id="print-dashboard" type="button" title="Gerar PDF pelo navegador">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            PDF
+          </button>
+        </div>
+      </div>
+
+      <section class="dashboard">
+        <section class="kpis" aria-label="Painel com status das tarefas">
+          <article class="kpi tone-blue" data-list="all"><div class="icon">▣</div><div><strong id="kpi-total">0</strong><span>Total de Tarefas</span><small id="kpi-total-hint">Dados filtrados</small></div></article>
+          <article class="kpi tone-green" data-list="closed"><div class="icon">✓</div><div><strong id="kpi-closed">0</strong><span>Tarefas Encerradas</span><small>Concluídas, fechadas, depreciadas e afins</small></div></article>
+          <article class="kpi tone-red" data-list="overdue"><div class="icon">!</div><div><strong id="kpi-overdue">0</strong><span>Tarefas em Atraso</span><small>Abertas com data prevista vencida</small></div></article>
+          <article class="kpi tone-teal" data-list="onTime"><div class="icon">◷</div><div><strong id="kpi-on-time">0%</strong><span>% no Prazo</span><small>Encerradas até a data prevista</small></div></article>
+          <article class="kpi tone-blue"><div class="icon">⏱</div><div><strong id="kpi-avg-age">0 dias</strong><span>Idade Média</span><small>Média de dias das tarefas abertas</small></div></article>
+          <article class="kpi tone-amber" data-list="noDueDate"><div class="icon">∅</div><div><strong id="kpi-no-due">0</strong><span>Sem Prazo</span><small>Tarefas sem data prevista definida</small></div></article>
+          <article class="kpi tone-red" data-list="stale"><div class="icon">⚠</div><div><strong id="kpi-stale">0</strong><span>Sem Atualizações</span><small>Mais de 60 dias sem nenhuma atualização</small></div></article>
+          <article class="kpi tone-teal" data-list="suspended"><div class="icon">⊘</div><div><strong id="kpi-suspended">0</strong><span>Suspensas</span><small>Tarefas com status suspensa</small></div></article>
+        </section>
+
+        <section class="card" id="coordination-card" hidden>
+          <div class="card-head"><h2>Quantidade por Projeto</h2></div>
+          <div id="coordination-bars" class="chart"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Volume de Tarefas por Mês</h2>
+            <span class="note" id="peak-note"></span>
+          </div>
+          <div id="volume-chart" class="chart"></div>
+          <div class="legend"><span><i class="dot" style="background:var(--blue)"></i>Criadas no mês</span><span><i class="dot" style="background:var(--green)"></i>Encerradas no mês</span><span><i class="dot" style="background:#d8892b"></i>Pendentes acumuladas</span></div>
+          <p class="note">Saldo: pendentes do mês anterior + criadas no mês - encerradas no mês. Ano e mês limitam os pontos exibidos; o saldo considera o histórico completo do grupo. O filtro de situação não altera este gráfico. Data de referência: <span id="volume-as-of"></span>.</p>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <div class="card-head"><h2 id="type-card-title">Tipos de Tarefas</h2></div>
+            <div id="type-pie" class="chart"></div>
+            <div id="type-legend" class="legend"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>Situação das Tarefas</h2></div>
+            <div id="status-bars" class="chart"></div>
+          </article>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <div class="card-head"><h2 id="type-bars-title">Tipos de Tarefa</h2></div>
+            <div id="type-bars" class="chart tall"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>Atraso por Tipo</h2></div>
+            <div id="overdue-type-bars" class="chart tall"></div>
+          </article>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <div class="card-head"><h2>Atraso por Projeto</h2></div>
+            <div id="overdue-project-bars" class="chart tall"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>Atraso por Sistema Demandado</h2></div>
+            <div id="overdue-entry-bars" class="chart tall"></div>
+          </article>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <div class="card-head"><h2>Tarefas Concluídas: No Prazo vs. Atrasadas</h2></div>
+            <div id="ontime-rate-chart" class="chart"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>Performance por Sprint</h2></div>
+            <div id="sprint-performance-chart" class="chart"></div>
+            <div class="legend sprint-legend">
+              <span><i class="dot" style="background:var(--green)"></i>Tarefas concluídas na sprint</span>
+              <span><i class="dot" style="background:#94a3b8"></i>Total de tarefas planejadas na sprint</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Gargalos (Tarefas abertas há mais de 30 dias)</h2>
+            <button class="icon-btn" id="view-bottlenecks" type="button" title="Ver lista completa">Ver</button>
+          </div>
+          <div id="bottlenecks-table" class="table-wrap" style="max-height:400px"></div>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <div class="card-head"><h2>Tempo Médio de Conclusão por Tipo (em dias)</h2></div>
+            <div id="avg-completion-bars" class="chart tall"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>Distribuição de Carga (Tarefas Abertas)</h2></div>
+            <div id="open-workload-bars" class="chart tall"></div>
+          </article>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <div class="card-head"><h2>Quantidade por Colaborador</h2></div>
+            <div id="assignee-bars" class="chart tall"></div>
+          </article>
+          <article class="card">
+            <div class="card-head">
+              <h2>Rastreabilidade</h2>
+              <button class="icon-btn" id="view-evidence" type="button" title="Ver lista completa">Ver</button>
+            </div>
+            <div id="evidence-table" class="table-wrap"></div>
+          </article>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2>Usuários sem atividade há mais de 40 dias</h2></div>
+          <div class="grid-2">
+            <article>
+              <div class="card-head">
+                <h3 style="color:#16a34a">Ativos</h3>
+                <button class="icon-btn" id="download-inactive-active" type="button" title="Baixar usuários ativos inativos">CSV</button>
+              </div>
+              <div id="inactive-users-table" class="table-wrap"></div>
+            </article>
+            <article>
+              <div class="card-head">
+                <h3 style="color:#dc2626">Bloqueados</h3>
+                <button class="icon-btn" id="download-inactive-blocked" type="button" title="Baixar usuários bloqueados inativos">CSV</button>
+              </div>
+              <div id="blocked-users-table" class="table-wrap"></div>
+            </article>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-panel">
+      <div class="modal-head">
+        <div>
+          <h2 id="modal-title">Listagem de tarefas</h2>
+          <div class="note" id="modal-subtitle"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="icon-btn" id="modal-csv" type="button" title="Baixar CSV dos dados filtrados">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+          <button class="icon-btn" id="modal-print" type="button" title="Gerar PDF pelo navegador">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            PDF
+          </button>
+          <button id="modal-close" type="button" title="Fechar" aria-label="Fechar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
     </div>
+  </div>
+  <div class="tooltip" id="tooltip"></div>
 
-    <section class="grid">
-      <a class="coord-card" href="painel_redmine_v4_site/index.html"><span>Instância de produção</span><strong>Redmine versão 4</strong><small>Painel de monitoramento dos dados da instância Redmine versão 4.</small></a><a class="coord-card" href="painel_redmine_v6_site/index.html"><span>Instância de treinamento</span><strong>Redmine versão 6</strong><small>Painel de monitoramento dos dados da instância Redmine versão 6.</small></a>
-    </section>
+  <script>
+    const TASKS = [{"id": "65", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/65", "coordination": "Processos de Trabalho", "title": "Teste 3", "project": "Gestão das Extrações de Dados", "subitem": "Gestão das Extrações de Dados", "type": "Dados (ETL)", "status": "Nova", "priority": "Normal", "assignee": "Tiffany  Márcia Tavares Neto", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-10-01", "due": "", "created": "2026-10-01", "updated": "2026-10-01", "done": "", "period": "2026-10-01", "year": 2026, "month": 10, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "64", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/64", "coordination": "Processos de Trabalho", "title": "XXXXXXXX", "project": "Gestão das Extrações de Dados", "subitem": "Gestão das Extrações de Dados", "type": "Dados (ETL)", "status": "Suspensa", "priority": "Alta", "assignee": "Tiffany  Márcia Tavares Neto", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-10-01", "due": "2026-10-01", "created": "2026-10-01", "updated": "2026-10-01", "done": "", "period": "2026-10-01", "year": 2026, "month": 10, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 18, "evidence": ""}, {"id": "63", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/63", "coordination": "Projetos de Governança", "title": "Documentação dos Testes das Configurações – Redmine 6", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Bruno Costa Mariani Maciel", "author": "Bruno Costa Mariani Maciel", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-09-23", "due": "2026-09-30", "created": "2026-09-23", "updated": "2026-09-23", "done": "", "period": "2026-09-23", "year": 2026, "month": 9, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 19, "evidence": ""}, {"id": "62", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/62", "coordination": "Processos de Trabalho", "title": "Extração teste", "project": "Gestão das Extrações de Dados", "subitem": "Gestão das Extrações de Dados", "type": "Dados (ETL)", "status": "Concluida", "priority": "Imediata", "assignee": "Bruno Costa Mariani Maciel", "author": "Bruno Costa Mariani Maciel", "entry": "Não informado", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-09-16", "due": "2026-09-23", "created": "2026-09-16", "updated": "2026-09-23", "done": "2026-09-23", "period": "2026-09-16", "year": 2026, "month": 9, "closed": true, "ongoing": false, "overdue": false, "onTime": true, "lateDays": 0, "evidence": ""}, {"id": "61", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/61", "coordination": "Projetos de Governança", "title": "Estrutura Analítica do Projeto - EAP", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "60", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/60", "coordination": "Projetos de Governança", "title": "Plano de Comunicação do Projeto", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "59", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/59", "coordination": "Projetos de Governança", "title": "Modelo do Projeto", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Não informado", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "58", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/58", "coordination": "Projetos de Governança", "title": "Matriz de partes interessadas", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Tiffany  Márcia Tavares Neto", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "57", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/57", "coordination": "Projetos de Governança", "title": "Matriz lógica e de indicadores", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "56", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/56", "coordination": "Projetos de Governança", "title": "Matriz de Riscos", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-06", "due": "2026-08-24", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-08-06", "year": 2026, "month": 8, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 56, "evidence": ""}, {"id": "55", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/55", "coordination": "Projetos de Governança", "title": "Matriz RACI", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Tiffany  Márcia Tavares Neto", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "54", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/54", "coordination": "Projetos de Governança", "title": "Cronograma", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Tiffany  Márcia Tavares Neto", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "52", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/52", "coordination": "Projetos de Governança", "title": "Análise de Requisito", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Análise", "status": "Nova", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "51", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/51", "coordination": "Projetos de Governança", "title": "Fase de Planejamento", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Projeto", "status": "Nova", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Caixa de Entrada Redmine", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "50", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/50", "coordination": "Projetos de Governança", "title": "Criação e Configuração do Novos Tipos de Tarefas “Evento”, \"Suporte Técnico\" ,\"Desenvolvimento de Sistema(TI)\", Cadastro de Iniciativa (DCI) TED(Acompanhamento), Passagens e Diárias e Dados(ETL) no Redmine 6 – Ambiente de Treinamento", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Desenvolvimento de Sistema(TI)", "status": "Em andamento", "priority": "Normal", "assignee": "Bruno Costa Mariani Maciel", "author": "Bruno Costa Mariani Maciel", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-09-02", "due": "2026-09-04", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-09-02", "year": 2026, "month": 9, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 45, "evidence": ""}, {"id": "49", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/49", "coordination": "Projetos de Governança", "title": "Análise de de Viabilidade", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Tiffany  Márcia Tavares Neto", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-07-29", "due": "2026-08-05", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-07-29", "year": 2026, "month": 7, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 75, "evidence": ""}, {"id": "48", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/48", "coordination": "Projetos de Governança", "title": "Termo de Abertura de Projeto", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-05-06", "due": "2026-05-30", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-05-06", "year": 2026, "month": 5, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 142, "evidence": ""}, {"id": "46", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/46", "coordination": "Projetos de Governança", "title": "Documento de Cadastro da Iniciativa", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Documentos", "status": "Revisão/Homologação", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-07-20", "due": "2026-07-24", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-07-20", "year": 2026, "month": 7, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 87, "evidence": ""}, {"id": "45", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/45", "coordination": "Projetos de Governança", "title": "Fase de Iniciação", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Projeto", "status": "Nova", "priority": "Normal", "assignee": "Thaís  Sales Barreto Toscano", "author": "Tiffany  Márcia Tavares Neto", "entry": "Caixa de Entrada Redmine", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-07-20", "due": "2026-07-24", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-07-20", "year": 2026, "month": 7, "closed": false, "ongoing": false, "overdue": true, "onTime": false, "lateDays": 87, "evidence": ""}, {"id": "44", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/44", "coordination": "Projetos de Governança", "title": "Termo de Encerramento do Projeto", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-09-04", "due": "2026-12-23", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-09-04", "year": 2026, "month": 9, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "43", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/43", "coordination": "Projetos de Governança", "title": "Relatório de Acompanhamento do Projeto - RAP", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-09-04", "due": "2026-12-31", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-09-04", "year": 2026, "month": 9, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "42", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/42", "coordination": "Projetos de Governança", "title": "Fase de Encerramento", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Projeto", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "SEI", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-09-04", "due": "2026-12-31", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-09-04", "year": 2026, "month": 9, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "41", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/41", "coordination": "Projetos de Governança", "title": "Fase de Monitoramento", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Projeto", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "SEI", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-09-04", "due": "2026-12-31", "created": "2026-09-04", "updated": "2026-09-04", "done": "", "period": "2026-09-04", "year": 2026, "month": 9, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "34", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/34", "coordination": "Projetos de Governança", "title": "Cronograma", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Não informado", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "33", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/33", "coordination": "Projetos de Governança", "title": "Matriz de partes interessadas", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Lucas  Ferreira Caxanga Rodrigues", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "32", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/32", "coordination": "Projetos de Governança", "title": "Plano de Comunicação do Projeto", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Lucas  Ferreira Caxanga Rodrigues", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "31", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/31", "coordination": "Projetos de Governança", "title": "Modelo de Projeto", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Baixa", "assignee": "Lucas  Ferreira Caxanga Rodrigues", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "30", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/30", "coordination": "Projetos de Governança", "title": "Matriz de Gestão de Risco do Projeto", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "29", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/29", "coordination": "Projetos de Governança", "title": "Matriz de atribuição - RACI", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "28", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/28", "coordination": "Projetos de Governança", "title": "Matriz lógica e de indicadores", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "27", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/27", "coordination": "Projetos de Governança", "title": "Fase de Planejamento", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Projeto", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "SEI", "requester": "Outro", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "26", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/26", "coordination": "Projetos de Governança", "title": "Análise de Viabilidade", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "21", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/21", "coordination": "Projetos de Governança", "title": "Reunião de abertura do projeto", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Reunião", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "20", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/20", "coordination": "Projetos de Governança", "title": "Termo de Abertura de Projeto", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Documentos", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "Não informado", "requester": "Não informado", "sprint": "Sem sprint", "start": "2026-08-28", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-08-28", "done": "", "period": "2026-08-28", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "19", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/19", "coordination": "Projetos de Governança", "title": "Kick-off do Projeto", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Projeto", "status": "Concluida", "priority": "Normal", "assignee": "Alexandre  Soares de Brito", "author": "Tiffany  Márcia Tavares Neto", "entry": "Caixa de Entrada Redmine", "requester": "DEAPS", "sprint": "Sem sprint", "start": "2026-05-27", "due": "2026-05-27", "created": "2026-08-28", "updated": "2026-08-28", "done": "2026-08-28", "period": "2026-05-27", "year": 2026, "month": 5, "closed": true, "ongoing": false, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "17", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/17", "coordination": "Projetos de Governança", "title": "Fase de iniciação", "project": "Impulso Gov", "subitem": "Impulso Gov", "type": "Projeto", "status": "Nova", "priority": "Normal", "assignee": "Laís  do Espirito Santo Lima", "author": "Tiffany  Márcia Tavares Neto", "entry": "SEI", "requester": "Outro órgão federal", "sprint": "Sem sprint", "start": "2024-11-06", "due": "2026-12-18", "created": "2026-08-28", "updated": "2026-09-09", "done": "", "period": "2024-11-06", "year": 2024, "month": 11, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "14", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/14", "coordination": "Projetos de Governança", "title": "Criação e Configuração do Novo Tipo de Tarefa “Documentos” no Redmine 6 – Ambiente de Treinamento", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Projeto", "status": "Concluida", "priority": "Normal", "assignee": "Bruno Costa Mariani Maciel", "author": "Bruno Costa Mariani Maciel", "entry": "Demanda Interna", "requester": "CGIAD", "sprint": "Sem sprint", "start": "2026-08-27", "due": "2026-08-28", "created": "2026-08-27", "updated": "2026-09-04", "done": "2026-09-04", "period": "2026-08-27", "year": 2026, "month": 8, "closed": true, "ongoing": false, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "13", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/13", "coordination": "Projetos de Governança", "title": "Épico - Consolidado de tarefas realizadas no Redmine versão 6 de treinamento", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Projeto", "status": "Em andamento", "priority": "Normal", "assignee": "Não informado", "author": "Bruno Costa Mariani Maciel", "entry": "Demanda Interna", "requester": "CGIAD", "sprint": "Sem sprint", "start": "2026-08-24", "due": "2026-12-31", "created": "2026-08-27", "updated": "2026-09-04", "done": "", "period": "2026-08-24", "year": 2026, "month": 8, "closed": false, "ongoing": true, "overdue": false, "onTime": false, "lateDays": 0, "evidence": ""}, {"id": "12", "url": "https://gestao-agil-saps-treinamento.saude.gov.br/issues/12", "coordination": "Projetos de Governança", "title": "Criação e configuração de campos personalizados no tipo de tarefa “Projetos” no Redmine Versão 6", "project": "Otimização da Gestão do Redmine", "subitem": "Otimização da Gestão do Redmine", "type": "Projeto", "status": "Concluida", "priority": "Alta", "assignee": "Bruno Costa Mariani Maciel", "author": "Bruno Costa Mariani Maciel", "entry": "Demanda interna", "requester": "CGIAD", "sprint": "Sem sprint", "start": "2026-08-26", "due": "2026-08-28", "created": "2026-08-26", "updated": "2026-08-27", "done": "2026-08-27", "period": "2026-08-26", "year": 2026, "month": 8, "closed": true, "ongoing": false, "overdue": false, "onTime": true, "lateDays": 0, "evidence": ""}];
+    const META = {"first_year": 2024, "last_year": 2026, "generated_at": "19/10/2026 17:49", "snapshot_date": "2026-10-19", "source_file": "API REST do Redmine", "coordination_count": 2, "coordinations": ["CGPROJ", "Processos de Trabalho", "Projetos de Governança"], "projects": ["Gestão das Extrações de Dados", "Impulso Gov", "Otimização da Gestão do Redmine"], "projects_by_coordination": {"Processos de Trabalho": ["Gestão das Extrações de Dados"], "Projetos de Governança": ["Impulso Gov", "Otimização da Gestão do Redmine"]}, "redmine_url": "https://gestao-agil-saps-treinamento.saude.gov.br"};
+    const USERS_ACTIVE = {"active": [{"login": "admin", "name": "Redmine Admin", "email": "admin@example.net", "last_login": "2026-06-24T22:19:57Z", "days_inactive": 117}, {"login": "analuisa.aguiar", "name": "Ana Luisa  Falcomer de Aguiar", "email": "analuisa.aguiar@saude.gov.br", "last_login": null, "days_inactive": null}, {"login": "audrey.fischer", "name": "Audrey Fischer", "email": "audrey.fischer@saude.gov.br", "last_login": null, "days_inactive": null}, {"login": "daniela.cruz", "name": "Daniela  Vera Cruz Dos Santos", "email": "daniela.cruz@saude.gov.br", "last_login": "2026-08-21T10:33:48Z", "days_inactive": 59}, {"login": "igor.gomes", "name": "Igor de Carvalho Gomes", "email": "igor.gomes@saude.gov.br", "last_login": "2026-08-21T15:50:25Z", "days_inactive": 59}, {"login": "lais.santo", "name": "Laís  do Espirito Santo Lima", "email": "lais.santo@saude.gov.br", "last_login": "2026-08-19T14:22:08Z", "days_inactive": 61}, {"login": "mauricio.capra", "name": "Mauricio  Capra", "email": "mauricio.capra@saude.gov.br", "last_login": "2026-08-21T10:33:56Z", "days_inactive": 59}, {"login": "rodrigo.gaete", "name": "Rodrigo André Cuevas", "email": "rodrigo.gaete@saude.gov.br", "last_login": "2026-08-11T09:12:04Z", "days_inactive": 69}], "blocked": []}.active;
+    const USERS_BLOCKED = {"active": [{"login": "admin", "name": "Redmine Admin", "email": "admin@example.net", "last_login": "2026-06-24T22:19:57Z", "days_inactive": 117}, {"login": "analuisa.aguiar", "name": "Ana Luisa  Falcomer de Aguiar", "email": "analuisa.aguiar@saude.gov.br", "last_login": null, "days_inactive": null}, {"login": "audrey.fischer", "name": "Audrey Fischer", "email": "audrey.fischer@saude.gov.br", "last_login": null, "days_inactive": null}, {"login": "daniela.cruz", "name": "Daniela  Vera Cruz Dos Santos", "email": "daniela.cruz@saude.gov.br", "last_login": "2026-08-21T10:33:48Z", "days_inactive": 59}, {"login": "igor.gomes", "name": "Igor de Carvalho Gomes", "email": "igor.gomes@saude.gov.br", "last_login": "2026-08-21T15:50:25Z", "days_inactive": 59}, {"login": "lais.santo", "name": "Laís  do Espirito Santo Lima", "email": "lais.santo@saude.gov.br", "last_login": "2026-08-19T14:22:08Z", "days_inactive": 61}, {"login": "mauricio.capra", "name": "Mauricio  Capra", "email": "mauricio.capra@saude.gov.br", "last_login": "2026-08-21T10:33:56Z", "days_inactive": 59}, {"login": "rodrigo.gaete", "name": "Rodrigo André Cuevas", "email": "rodrigo.gaete@saude.gov.br", "last_login": "2026-08-11T09:12:04Z", "days_inactive": 69}], "blocked": []}.blocked;
+    const REDMINE_BASE_URL = "https://gestao-agil-saps-treinamento.saude.gov.br";
+    const MONTHS = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+    const PALETTE = ["#2477a8","#5aaa78","#4b9c95","#8dc6d8","#9ccfb2","#e0a64f","#6b8fb3","#78b7b2"];
+    let currentFiltered = [];
+    let currentModalRows = [];
+    let currentBottlenecks = [];
+    let currentEvidence = [];
 
-    <div class="footer">Monitoramento e Controle | Ministério da Saúde</div>
-  </main>
+    const $ = (selector) => document.querySelector(selector);
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+    const pct = (value, total) => total ? (value / total * 100) : 0;
+    const fmtPct = (value) => `${value.toFixed(1).replace(".", ",")}%`;
+    const parseDate = (value) => value ? new Date(`${value}T00:00:00`) : null;
+    const monthKey = (task, field) => task[field] ? task[field].slice(0, 7) : "";
+    const countBy = (rows, getter) => {
+      const map = new Map();
+      rows.forEach((row) => {
+        const key = getter(row) || "Não informado";
+        map.set(key, (map.get(key) || 0) + 1);
+      });
+      return [...map.entries()].map(([label, value]) => ({label, value})).sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, "pt-BR"));
+    };
+    const uniq = (values) => [...new Set(values.filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
+    const truncateLabel = (label, maxLength = 24) => {
+      const text = String(label ?? "");
+      return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1)}…`;
+    };
+
+    function selectedValues(name) {
+      return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((input) => input.value);
+    }
+
+    function syncSubitemOptions(resetSelection = false) {
+      const subitemFilter = $("#subitem-filter");
+      if (!subitemFilter) return;
+      const previousSelection = new Set(selectedValues("subitem"));
+      const coordinationInputs = document.querySelectorAll('input[name="coordination"]');
+      const selectedCoordinations = selectedValues("coordination");
+      const hasCoordinationFilter = coordinationInputs.length > 0;
+      const availableSubitems = hasCoordinationFilter
+        ? uniq(selectedCoordinations.flatMap((coordination) =>
+            META.projects_by_coordination?.[coordination] || TASKS
+              .filter((task) => task.coordination === coordination)
+              .map((task) => task.subitem)
+          ))
+        : uniq([...TASKS.map((task) => task.subitem), ...(META.projects || [])]);
+      const options = availableSubitems.map((value) => ({label: value, value}));
+      subitemFilter.outerHTML = makeFilterGroup("Subitem / Projeto", "subitem", options, "subitem-filter");
+      document.querySelectorAll('input[name="subitem"]').forEach((input) => {
+        input.checked = resetSelection || previousSelection.has(input.value);
+      });
+    }
+
+    function syncAssigneeOptions(resetSelection = false) {
+      const assigneeFilter = $("#assignee-filter");
+      if (!assigneeFilter) return;
+      const previousSelection = new Set(selectedValues("assignee"));
+      const coordinationInputs = document.querySelectorAll('input[name="coordination"]');
+      const selectedCoordinations = selectedValues("coordination");
+      const availableAssignees = coordinationInputs.length
+        ? uniq(selectedCoordinations.flatMap((coordination) =>
+            TASKS.filter((task) => task.coordination === coordination).map((task) => task.assignee)
+          ))
+        : uniq(TASKS.map((task) => task.assignee));
+      const options = availableAssignees.map((value) => ({label: value, value}));
+      assigneeFilter.outerHTML = makeFilterGroup("Colaborador", "assignee", options, "assignee-filter");
+      document.querySelectorAll('input[name="assignee"]').forEach((input) => {
+        input.checked = resetSelection || previousSelection.has(input.value);
+      });
+    }
+
+    function makeFilterGroup(title, name, options, id = "") {
+      return `
+        <fieldset class="filter-group"${id ? ` id="${escapeHtml(id)}"` : ""}>
+          <legend>${escapeHtml(title)}</legend>
+          <div class="filter-group-actions">
+            <button type="button" class="mini-btn" data-filter-action="all" data-filter-group="${name}">Selecionar tudo</button>
+            <button type="button" class="mini-btn" data-filter-action="none" data-filter-group="${name}">Limpar grupo</button>
+          </div>
+          <div class="check-list">
+            ${options.map((option) => `
+              <label><input type="checkbox" name="${name}" value="${escapeHtml(option.value)}" checked> <span>${escapeHtml(option.label)}</span></label>
+            `).join("")}
+          </div>
+        </fieldset>
+      `;
+    }
+
+    function initFilters() {
+      const years = [];
+      for (let year = META.first_year; year <= META.last_year; year += 1) years.push({label: String(year), value: String(year)});
+      const months = MONTHS.map((label, index) => ({label, value: String(index + 1)}));
+      const types = uniq(TASKS.map((task) => task.type)).map((value) => ({label: value, value}));
+      const coordinationValues = uniq([...TASKS.map((task) => task.coordination), ...(META.coordinations || [])]);
+      const coordinations = coordinationValues.map((value) => ({label: value, value}));
+      const subitems = uniq([...TASKS.map((task) => task.subitem), ...(META.projects || [])]).map((value) => ({label: value, value}));
+      const statuses = uniq(TASKS.map((task) => task.status)).map((value) => ({label: value, value}));
+      const assignees = uniq(TASKS.map((task) => task.assignee)).map((value) => ({label: value, value}));
+      const sprints = uniq(TASKS.map((task) => task.sprint)).map((value) => ({label: value, value}));
+      const groups = [
+        makeFilterGroup("Ano", "year", years),
+        makeFilterGroup("Mês", "month", months),
+        makeFilterGroup("Tipo de tarefa", "type", types),
+      ];
+      if (coordinations.length) {
+        groups.push(makeFilterGroup("Coordenação", "coordination", coordinations));
+      }
+      groups.push(
+        makeFilterGroup("Subitem / Projeto", "subitem", subitems, "subitem-filter"),
+        makeFilterGroup("Situação da tarefa", "status", statuses),
+        makeFilterGroup("Colaborador", "assignee", assignees, "assignee-filter"),
+        makeFilterGroup("Sprint", "sprint", sprints),
+      );
+      $("#filters").innerHTML = groups.join("");
+      syncAssigneeOptions();
+      const projectNav = $("#project-nav");
+      const menuCoordinations = uniq(META.coordinations || coordinationValues);
+      if (menuCoordinations.length) {
+        projectNav.insertAdjacentHTML("beforeend", menuCoordinations.map((coordination) =>
+          `<button class="coord-chip" type="button" data-coordination="${escapeHtml(coordination)}">${escapeHtml(coordination)}</button>`
+        ).join(""));
+        projectNav.addEventListener("click", (event) => {
+          const chip = event.target.closest("button[data-coordination]");
+          if (!chip) return;
+          const selectedCoordination = chip.dataset.coordination;
+          document.querySelectorAll('input[name="coordination"]').forEach((input) => {
+            input.checked = input.value === selectedCoordination;
+          });
+          syncSubitemOptions(true);
+          syncAssigneeOptions(true);
+          projectNav.querySelectorAll(".coord-chip").forEach((item) => item.classList.remove("active"));
+          chip.classList.add("active");
+          updateDashboard();
+        });
+      }
+      $("#filters").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-filter-action]");
+        if (!button) return;
+        const groupName = button.dataset.filterGroup;
+        const shouldCheckAll = button.dataset.filterAction === "all";
+        document.querySelectorAll(`input[name="${groupName}"]`).forEach((input) => { input.checked = shouldCheckAll; });
+        if (groupName === "coordination") {
+          syncSubitemOptions(shouldCheckAll);
+          syncAssigneeOptions(shouldCheckAll);
+        }
+        updateDashboard();
+      });
+      $("#filters").addEventListener("change", (event) => {
+        if (event.target.name === "coordination") {
+          syncSubitemOptions();
+          syncAssigneeOptions();
+        }
+        updateDashboard();
+      });
+      $("#apply-defaults").addEventListener("click", () => {
+        document.querySelectorAll('#filters input[type="checkbox"]').forEach((input) => input.checked = true);
+        syncSubitemOptions(true);
+        syncAssigneeOptions(true);
+        updateDashboard();
+      });
+      $("#clear-filters").addEventListener("click", () => {
+        document.querySelectorAll('#filters input[type="checkbox"]').forEach((input) => input.checked = false);
+        syncSubitemOptions();
+        syncAssigneeOptions();
+        updateDashboard();
+      });
+    }
+
+    function getFilteredRows() {
+      const years = selectedValues("year").map(Number);
+      const months = selectedValues("month").map(Number);
+      const types = selectedValues("type");
+      const coordinations = selectedValues("coordination");
+      const hasCoordinationFilter = document.querySelectorAll('input[name="coordination"]').length > 0;
+      const subitems = selectedValues("subitem");
+      const statuses = selectedValues("status");
+      const assignees = selectedValues("assignee");
+      const sprints = selectedValues("sprint");
+      return TASKS.filter((task) =>
+        years.includes(task.year) &&
+        months.includes(task.month) &&
+        types.includes(task.type) &&
+        (!hasCoordinationFilter || coordinations.includes(task.coordination)) &&
+        subitems.includes(task.subitem) &&
+        statuses.includes(task.status) &&
+        assignees.includes(task.assignee) &&
+        sprints.includes(task.sprint)
+      );
+    }
+
+    function emptyChart(text) {
+      return `<div class="empty">${escapeHtml(text)}</div>`;
+    }
+
+    function showTip(event, text) {
+      const tip = $("#tooltip");
+      tip.textContent = text;
+      tip.style.display = "block";
+      tip.style.left = `${event.clientX + 12}px`;
+      tip.style.top = `${event.clientY + 12}px`;
+    }
+
+    function hideTip() {
+      $("#tooltip").style.display = "none";
+    }
+
+    function svgWrap(content, height = 260) {
+      return `<svg viewBox="0 0 720 ${height}" role="img" style="width:100%;height:auto;display:block">${content}</svg>`;
+    }
+
+    function renderVolumeChart() {
+      const years = selectedValues("year").map(Number);
+      const months = selectedValues("month").map(Number);
+      const types = selectedValues("type");
+      const coordinations = selectedValues("coordination");
+      const hasCoordinationFilter = document.querySelectorAll('input[name="coordination"]').length > 0;
+      const subitems = selectedValues("subitem");
+      const assignees = selectedValues("assignee");
+      const sprints = selectedValues("sprint");
+      const volumeRows = TASKS.filter((task) =>
+        types.includes(task.type) &&
+        (!hasCoordinationFilter || coordinations.includes(task.coordination)) &&
+        subitems.includes(task.subitem) &&
+        assignees.includes(task.assignee) &&
+        sprints.includes(task.sprint)
+      );
+      const currentDate = new Date(`${META.snapshot_date}T00:00:00`);
+      const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
+      $("#volume-as-of").textContent = META.snapshot_date;
+      const eventMonths = volumeRows.flatMap((task) => [monthKey(task, "created"), monthKey(task, "done")]).filter(Boolean);
+      if (volumeRows.length) eventMonths.push(currentMonth);
+      const firstMonth = eventMonths.length ? eventMonths.sort()[0] : "";
+      const allKeys = [];
+      if (firstMonth) {
+        const [firstYear, firstMonthNumber] = firstMonth.split("-").map(Number);
+        let year = firstYear, month = firstMonthNumber;
+        while (`${year}-${String(month).padStart(2, "0")}` <= currentMonth) {
+          allKeys.push(`${year}-${String(month).padStart(2, "0")}`);
+          month += 1;
+          if (month > 12) { month = 1; year += 1; }
+        }
+      }
+      const keys = allKeys.filter((key) => years.includes(Number(key.slice(0, 4))) && months.includes(Number(key.slice(5, 7))));
+      if (!keys.length) {
+        $("#volume-chart").innerHTML = emptyChart("Sem datas suficientes para montar o volume mensal.");
+        $("#peak-note").textContent = "";
+        return;
+      }
+      const cutoffDate = (key) => {
+        if (key === currentMonth) {
+          return `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
+        }
+        const [year, month] = key.split("-").map(Number);
+        return new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+      };
+      const createdMap = new Map(countBy(volumeRows.filter((task) => task.created && task.created <= cutoffDate(monthKey(task, "created"))), (task) => monthKey(task, "created")).map((item) => [item.label, item.value]));
+      const closeMap = new Map(countBy(volumeRows.filter((task) => task.done && task.done <= cutoffDate(monthKey(task, "done"))), (task) => monthKey(task, "done")).map((item) => [item.label, item.value]));
+      const seriesA = keys.map((key) => createdMap.get(key) || 0);
+      const seriesB = keys.map((key) => closeMap.get(key) || 0);
+      let pendingBalance = 0;
+      const pendingByMonth = new Map(allKeys.map((key) => {
+        pendingBalance += (createdMap.get(key) || 0) - (closeMap.get(key) || 0);
+        return [key, pendingBalance];
+      }));
+      const seriesC = keys.map((key) => pendingByMonth.get(key) || 0);
+      const maxValue = Math.max(1, ...seriesA, ...seriesB, ...seriesC);
+      const left = 54, right = 18, top = 18, bottom = 60, width = 720 - left - right, height = 312, plotH = height - top - bottom;
+      const x = (index) => left + (keys.length === 1 ? width / 2 : index * width / (keys.length - 1));
+      const y = (value) => top + plotH - (value / maxValue * plotH);
+      const line = (values, hOffset = 0) => values.map((value, index) => `${index ? "L" : "M"} ${(x(index) + hOffset).toFixed(1)} ${y(value).toFixed(1)}`).join(" ");
+      const area = (values, hOffset = 0) => `${line(values, hOffset)} L ${(x(keys.length - 1) + hOffset).toFixed(1)} ${top + plotH} L ${(x(0) + hOffset).toFixed(1)} ${top + plotH} Z`;
+      const ticks = [0, .25, .5, .75, 1].map((ratio) => {
+        const value = Math.round(maxValue * ratio);
+        const yy = y(value);
+        return `<line x1="${left}" y1="${yy}" x2="${720 - right}" y2="${yy}" stroke="#d8e2ef" stroke-dasharray="2 6"/><text x="12" y="${yy + 4}" font-size="12" fill="#667085">${value}</text>`;
+      }).join("");
+      const n = keys.length;
+      const labelInterval = n > 24 ? 6 : n > 12 ? 3 : n > 6 ? 2 : 1;
+      const ly = top + plotH + 28;
+      const labels = keys.map((key, index) => {
+        if (index % labelInterval !== 0) return "";
+        const [year, month] = key.split("-");
+        const lx = x(index).toFixed(1);
+        return `<text transform="translate(${lx},${ly}) rotate(-45)" font-size="12" fill="#667085" text-anchor="middle">${MONTHS[Number(month)-1]} ${year}</text>`;
+      }).join("");
+      const points = (values, color, kind, hOffset, label) => values.map((value, index) => {
+        const cx = x(index) + hOffset;
+        return `<circle cx="${cx}" cy="${y(value)}" r="6" fill="${color}" stroke="white" stroke-width="1.5" data-chart="${kind}" data-key="${keys[index]}" data-label="${label} em ${keys[index]}: ${value}" style="cursor:pointer" />`;
+      }).join("");
+      const maxStarted = Math.max(...seriesA);
+      const minStarted = Math.min(...seriesA);
+      const maxKey = keys[seriesA.indexOf(maxStarted)];
+      const minKey = keys[seriesA.indexOf(minStarted)];
+      $("#peak-note").textContent = `Maior número de criações: ${maxStarted} em ${maxKey} | menor: ${minStarted} em ${minKey}`;
+      $("#volume-chart").innerHTML = svgWrap(`
+        ${ticks}
+        <path d="${area(seriesA, -3)}" fill="#2477a8" opacity=".13"></path>
+        <path d="${area(seriesB, 3)}" fill="#5aaa78" opacity=".15"></path>
+        <path d="${line(seriesA, -3)}" fill="none" stroke="#2477a8" stroke-width="4"></path>
+        <path d="${line(seriesB, 3)}" fill="none" stroke="#5aaa78" stroke-width="4"></path>
+        <path d="${line(seriesC)}" fill="none" stroke="#d8892b" stroke-width="3" stroke-dasharray="7 5"></path>
+        ${points(seriesA, "#2477a8", "criadas", -3, "Criadas")}
+        ${points(seriesB, "#5aaa78", "encerradas", 3, "Encerradas")}
+        ${points(seriesC, "#d8892b", "pendentes", 0, "Pendentes acumuladas")}
+        ${labels}
+      `, height);
+      $("#volume-chart").querySelectorAll("[data-chart]").forEach((el) => {
+        el.addEventListener("mousemove", (event) => showTip(event, el.dataset.label));
+        el.addEventListener("mouseleave", hideTip);
+        el.addEventListener("click", () => {
+          const key = el.dataset.key;
+          const chartKind = el.dataset.chart;
+          const chartRows = volumeRows.filter((task) => {
+            if (chartKind === "criadas") return monthKey(task, "created") === key;
+            if (chartKind === "encerradas") return monthKey(task, "done") === key;
+            if (chartKind === "pendentes") {
+              const cutoff = cutoffDate(key);
+              return task.created && task.created <= cutoff && (!task.done || task.done > cutoff);
+            }
+            return false;
+          });
+          const kind = chartKind === "criadas" ? "Criadas" : chartKind === "encerradas" ? "Encerradas" : `Pendentes acumuladas até ${cutoffDate(key)}`;
+          openTaskList(chartRows, `Volume de tarefas ${kind} - ${key}`);
+        });
+      });
+    }
+
+    function renderDonut(rows) {
+      const allValues = countBy(rows, (task) => task.type);
+      const hasMoreTypes = allValues.length > 10 && !isTypeFiltered();
+      const values = allValues.slice(0, 10);
+      const total = rows.length;
+      
+      // Atualizar título do card
+      $("#type-card-title").textContent = hasMoreTypes ? `Tipos de Tarefas (10+)` : `Tipos de Tarefas`;
+      
+      if (!total) {
+        $("#type-pie").innerHTML = emptyChart("Sem tarefas no recorte.");
+        $("#type-legend").innerHTML = "";
+        return;
+      }
+      
+      // Calcular valor dos demais tipos
+      const displayedSum = values.reduce((sum, item) => sum + item.value, 0);
+      const remainingCount = total - displayedSum;
+      const remainingTypesCount = allValues.length - 10;
+      
+      // Adicionar fatia "Demais tipos" se houver mais de 10 tipos
+      const chartValues = hasMoreTypes 
+        ? [...values, { label: `Demais tipos (${remainingTypesCount})`, value: remainingCount, key: "__demais__" }]
+        : values;
+      
+      let angle = -90;
+      const cx = 360, cy = 150, outer = 120, inner = 60;
+      const paths = chartValues.map((item, index) => {
+        const slice = item.value / total * 360;
+        const start = angle;
+        const end = angle + slice;
+        angle = end;
+        const large = slice > 180 ? 1 : 0;
+        const p = (deg, radius) => {
+          const rad = deg * Math.PI / 180;
+          return [cx + Math.cos(rad) * radius, cy + Math.sin(rad) * radius];
+        };
+        const [x1, y1] = p(start, outer), [x2, y2] = p(end, outer), [x3, y3] = p(end, inner), [x4, y4] = p(start, inner);
+        const path = `M ${x1} ${y1} A ${outer} ${outer} 0 ${large} 1 ${x2} ${y2} L ${x3} ${y3} A ${inner} ${inner} 0 ${large} 0 ${x4} ${y4} Z`;
+        const color = item.key === "__demais__" ? "#94a3b8" : PALETTE[index % PALETTE.length];
+        return `<path d="${path}" fill="${color}" data-type="${escapeHtml(item.key || item.label)}" data-label="${escapeHtml(item.label)}: ${item.value} (${fmtPct(pct(item.value,total))})" />`;
+      }).join("");
+      
+      const centerText = `
+        <text x="${cx}" y="${cy - 10}" font-size="48" font-weight="700" fill="#1e3a5f" text-anchor="middle" dominant-baseline="middle">${total}</text>
+        <text x="${cx}" y="${cy + 28}" font-size="16" font-weight="600" fill="#64748b" text-anchor="middle" dominant-baseline="middle">TAREFAS</text>
+      `;
+      $("#type-pie").innerHTML = svgWrap(paths + centerText, 310);
+      
+      const legendItems = chartValues.map((item, index) => {
+        const color = item.key === "__demais__" ? "#94a3b8" : PALETTE[index % PALETTE.length];
+        const label = truncateLabel(item.label, 28);
+        return `<span title="${escapeHtml(item.label)}"><i class="dot" style="background:${color}"></i>${escapeHtml(label)} (${fmtPct(pct(item.value,total))})</span>`;
+      }).join("");
+      $("#type-legend").innerHTML = legendItems;
+      
+      $("#type-pie").querySelectorAll("[data-type]").forEach((el) => {
+        el.addEventListener("mousemove", (event) => showTip(event, el.dataset.label));
+        el.addEventListener("mouseleave", hideTip);
+        el.addEventListener("click", () => {
+          if (el.dataset.type === "__demais__") {
+            const remainingTypes = allValues.slice(10).map(v => v.label);
+            const tasksList = currentFiltered.filter((task) => remainingTypes.includes(task.type));
+            openTaskList(tasksList, `Demais tipos de tarefas`);
+          } else {
+            openTaskList(currentFiltered.filter((task) => task.type === el.dataset.type), `Tipo de tarefa: ${el.dataset.type}`);
+          }
+        });
+      });
+    }
+
+    function isTypeFiltered() {
+      return selectedValues("type").length !== uniq(TASKS.map((task) => task.type)).length;
+    }
+
+    function renderHorizontalBars(container, values, options = {}) {
+      const maxValue = Math.max(1, ...values.map((item) => item.value));
+      const rowH = options.rowH || 42;
+      const height = Math.max(150, values.length * rowH + 34);
+      const left = options.left || 190, right = 50, top = 18, barH = Math.min(30, rowH - 12);
+      const width = 720 - left - right;
+      if (!values.length) {
+        container.innerHTML = emptyChart("Sem dados para o recorte.");
+        return;
+      }
+      const labelMaxLength = options.labelMaxLength || 22;
+      const bars = values.map((item, index) => {
+        const y = top + index * rowH;
+        const w = item.value / maxValue * width;
+        const color = item.color || options.color || PALETTE[index % PALETTE.length];
+        const label = truncateLabel(item.label, labelMaxLength);
+        return `
+          <text x="${left - 10}" y="${y + barH / 2 + 5}" text-anchor="end" font-size="16" fill="#334155" title="${escapeHtml(item.label)}">${escapeHtml(label)}</text>
+          <rect x="${left}" y="${y}" width="${Math.max(2,w)}" height="${barH}" rx="4" fill="${color}" data-key="${escapeHtml(item.key || item.label)}" data-label="${escapeHtml(item.label)}: ${item.value}"></rect>
+          <text x="${left + w + 8}" y="${y + barH / 2 + 5}" font-size="16" font-weight="700" fill="#24364d">${item.value}</text>
+        `;
+      }).join("");
+      container.innerHTML = svgWrap(bars, height);
+      container.querySelectorAll("[data-key]").forEach((el) => {
+        el.addEventListener("mousemove", (event) => showTip(event, el.dataset.label));
+        el.addEventListener("mouseleave", hideTip);
+        el.addEventListener("click", () => options.onClick?.(el.dataset.key));
+      });
+    }
+
+    function renderTypeBars(rows) {
+      const values = countBy(rows, (task) => task.type);
+      $("#type-bars-title").textContent = `Tipos de Tarefa (${values.length})`;
+      renderHorizontalBars($("#type-bars"), values, {
+        left: 230,
+        rowH: 46,
+        onClick: (type) => openTaskList(currentFiltered.filter((task) => task.type === type), `Tipo de tarefa: ${type}`)
+      });
+    }
+
+    function renderStatusBars(rows) {
+      const values = countBy(rows, (task) => task.status);
+      renderHorizontalBars($("#status-bars"), values, {
+        left: 220,
+        rowH: 46,
+        onClick: (label) => openTaskList(rows.filter((task) => task.status === label), `Situação: ${label}`)
+      });
+    }
+
+    function renderCoordinationBars(rows) {
+      const card = $("#coordination-card");
+      if (META.coordination_count <= 1) {
+        card.hidden = true;
+        return;
+      }
+      card.hidden = false;
+      const values = countBy(rows, (task) => task.project);
+      renderHorizontalBars($("#coordination-bars"), values, {
+        left: 310,
+        labelMaxLength: 38,
+        rowH: 46,
+        onClick: (project) => openTaskList(currentFiltered.filter((task) => task.project === project), `Projeto: ${project}`)
+      });
+    }
+
+    function renderAssigneeBars(rows) {
+      const values = countBy(rows, (task) => task.assignee);
+      renderHorizontalBars($("#assignee-bars"), values, {
+        left: 240,
+        rowH: 46,
+        onClick: (assignee) => openTaskList(currentFiltered.filter((task) => task.assignee === assignee), `Tarefas por colaborador: ${assignee}`)
+      });
+    }
+
+    function renderOverdueByProject(rows) {
+      const overdueRows = rows.filter((task) => task.overdue);
+      if (!overdueRows.length) {
+        $("#overdue-project-bars").innerHTML = emptyChart("Sem tarefas em atraso.");
+        return;
+      }
+      const values = countBy(overdueRows, (task) => task.subitem);
+      renderHorizontalBars($("#overdue-project-bars"), values, {
+        left: 310,
+        labelMaxLength: 38,
+        rowH: 46,
+        onClick: (project) => openTaskList(overdueRows.filter((task) => task.subitem === project), `Atraso - Projeto: ${project}`)
+      });
+    }
+
+    function renderOverdueByType(rows) {
+      const overdueRows = rows.filter((task) => task.overdue);
+      if (!overdueRows.length) {
+        $("#overdue-type-bars").innerHTML = emptyChart("Sem tarefas em atraso.");
+        return;
+      }
+      const values = countBy(overdueRows, (task) => task.type);
+      renderHorizontalBars($("#overdue-type-bars"), values, {
+        left: 240,
+        rowH: 46,
+        onClick: (type) => openTaskList(overdueRows.filter((task) => task.type === type), `Atraso - Tipo: ${type}`)
+      });
+    }
+
+    function renderOverdueByEntry(rows) {
+      const overdueRows = rows.filter((task) => task.overdue);
+      if (!overdueRows.length) {
+        $("#overdue-entry-bars").innerHTML = emptyChart("Sem tarefas em atraso.");
+        return;
+      }
+      const values = countBy(overdueRows, (task) => task.entry);
+      renderHorizontalBars($("#overdue-entry-bars"), values, {
+        left: 240,
+        rowH: 46,
+        onClick: (entry) => openTaskList(overdueRows.filter((task) => task.entry === entry), `Atraso - Sistema: ${entry}`)
+      });
+    }
+
+    function renderEvidenceTable(rows) {
+      const rowsWithEvidence = rows.filter((task) => task.evidence || task.url).slice(0, 40);
+      currentEvidence = rows.filter((task) => task.evidence || task.url);
+      if (!rowsWithEvidence.length) {
+        $("#evidence-table").innerHTML = `<div class="empty">Sem vínculos de evidência no recorte.</div>`;
+        currentEvidence = [];
+        return;
+      }
+      $("#evidence-table").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Tarefa</th>
+              <th>Título</th>
+              <th>Situação</th>
+              <th>Responsável</th>
+              <th>Tipo</th>
+              <th>Data Término</th>
+              <th>Atraso</th>
+              <th>Sistema</th>
+              <th>Coordenação</th>
+              <th>Sprint</th>
+              <th>Evidência</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsWithEvidence.map((task) => `
+              <tr>
+                <td>${task.url ? `<a href="${escapeHtml(task.url)}" target="_blank" rel="noopener">#${escapeHtml(task.id)}</a>` : escapeHtml(task.id)}</td>
+                <td>${escapeHtml(task.title)}</td>
+                <td>${escapeHtml(task.status || "-")}</td>
+                <td>${escapeHtml(task.assignee || "-")}</td>
+                <td>${escapeHtml(task.type || "-")}</td>
+                <td>${escapeHtml(task.end_date || "-")}</td>
+                <td>${task.overdue ? '<span style="color:#e05a5a;font-weight:700">Sim</span>' : '<span style="color:#5aaa78">Não</span>'}</td>
+                <td>${escapeHtml(task.entry || "-")}</td>
+                <td>${escapeHtml(task.coordination || "-")}</td>
+                <td>${escapeHtml(task.sprint || "-")}</td>
+                <td>${escapeHtml(task.evidence || "Link da tarefa no Redmine")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function filterByListKey(rows, key) {
+      if (key === "closed") return rows.filter((task) => task.closed);
+      if (key === "overdue") return rows.filter((task) => task.overdue);
+      if (key === "onTime") return rows.filter((task) => task.onTime);
+      if (key === "ongoing") return rows.filter((task) => task.ongoing);
+      if (key === "noDueDate") return rows.filter((task) => !task.closed && !task.due);
+      if (key === "stale") {
+        const sixtyDaysAgo = new Date(new Date().getTime() - (60 * 24 * 60 * 60 * 1000));
+        return rows.filter((task) => !task.closed && task.updated && new Date(task.updated) < sixtyDaysAgo);
+      }
+      if (key === "suspended") return rows.filter((task) => String(task.status || "").toLowerCase().includes("suspens"));
+      return rows;
+    }
+
+    function renderTrendChart(rows) {
+      const byMonth = {};
+      rows.forEach((task) => {
+        if (task.created) {
+          const key = task.created.substring(0, 7);
+          if (!byMonth[key]) byMonth[key] = { opened: 0, closed: 0 };
+          byMonth[key].opened++;
+        }
+        if (task.done) {
+          const key = task.done.substring(0, 7);
+          if (!byMonth[key]) byMonth[key] = { opened: 0, closed: 0 };
+          byMonth[key].closed++;
+        }
+      });
+      const sorted = Object.keys(byMonth).sort();
+      const last12 = sorted.slice(-12);
+      if (!last12.length) {
+        $("#trend-chart").innerHTML = emptyChart("Sem dados de tendência.");
+        return;
+      }
+      const maxVal = Math.max(...last12.map((k) => Math.max(byMonth[k].opened, byMonth[k].closed)));
+      const width = 720, height = 300, padding = { top: 20, right: 40, bottom: 50, left: 60 };
+      const chartW = width - padding.left - padding.right;
+      const chartH = height - padding.top - padding.bottom;
+      const stepX = chartW / (last12.length - 1 || 1);
+      const scaleY = (val) => padding.top + chartH - (val / (maxVal || 1)) * chartH;
+      
+      // Grid lines
+      const gridLines = [0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+        const value = Math.round(maxVal * ratio);
+        const y = scaleY(value);
+        return `
+          <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="#e5e7eb" stroke-width="1" />
+          <text x="${padding.left - 10}" y="${y + 4}" text-anchor="end" font-size="12" fill="#64748b">${value}</text>
+        `;
+      }).join("");
+      
+      // Vertical grid lines
+      const verticalGrid = last12.map((k, i) => {
+        const x = padding.left + i * stepX;
+        return `<line x1="${x}" y1="${padding.top}" x2="${x}" y2="${height - padding.bottom}" stroke="#f3f4f6" stroke-width="1" />`;
+      }).join("");
+      
+      // Axis lines
+      const axes = `
+        <line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}" stroke="#94a3b8" stroke-width="2" />
+        <line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#94a3b8" stroke-width="2" />
+      `;
+      
+      const openedPath = last12.map((k, i) => `${i === 0 ? "M" : "L"}${padding.left + i * stepX},${scaleY(byMonth[k].opened)}`).join(" ");
+      const closedPath = last12.map((k, i) => `${i === 0 ? "M" : "L"}${padding.left + i * stepX},${scaleY(byMonth[k].closed)}`).join(" ");
+      
+      // Month labels
+      const MONTH_ABBR = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+      const labels = last12.map((k, i) => {
+        const [year, month] = k.split("-");
+        const label = `${MONTH_ABBR[Number(month) - 1]}/${year.substring(2)}`;
+        return `<text x="${padding.left + i * stepX}" y="${height - 20}" text-anchor="middle" font-size="13" fill="#475569">${label}</text>`;
+      }).join("");
+      
+      const svg = `
+        ${verticalGrid}
+        ${gridLines}
+        ${axes}
+        <path d="${openedPath}" stroke="var(--blue)" stroke-width="3" fill="none" />
+        <path d="${closedPath}" stroke="var(--green)" stroke-width="3" fill="none" />
+        ${last12.map((k, i) => `<circle cx="${padding.left + i * stepX}" cy="${scaleY(byMonth[k].opened)}" r="5" fill="var(--blue)" data-type="opened" data-key="${k}" data-label="Abertas em ${k}: ${byMonth[k].opened}" style="cursor:pointer" />`).join("")}
+        ${last12.map((k, i) => `<circle cx="${padding.left + i * stepX}" cy="${scaleY(byMonth[k].closed)}" r="5" fill="var(--green)" data-type="closed" data-key="${k}" data-label="Concluídas em ${k}: ${byMonth[k].closed}" style="cursor:pointer" />`).join("")}
+        ${labels}
+      `;
+      $("#trend-chart").innerHTML = svgWrap(svg, height);
+      $("#trend-chart").querySelectorAll("[data-key]").forEach((el) => {
+        el.addEventListener("mousemove", (event) => showTip(event, el.dataset.label));
+        el.addEventListener("mouseleave", hideTip);
+        el.addEventListener("click", () => {
+          const key = el.dataset.key;
+          const chartRows = currentFiltered.filter((task) => 
+            el.dataset.type === "closed" ? (task.done && task.done.substring(0, 7) === key) : (task.created && task.created.substring(0, 7) === key)
+          );
+          openTaskList(chartRows, `Tendência - ${key}`);
+        });
+      });
+    }
+
+    function renderOnTimeRateChart(rows) {
+      const closedRows = rows.filter((task) => task.closed);
+      if (!closedRows.length) {
+        $("#ontime-rate-chart").innerHTML = emptyChart("Sem tarefas concluídas.");
+        return;
+      }
+      const onTimeCount = closedRows.filter((task) => task.onTime).length;
+      const lateCount = closedRows.length - onTimeCount;
+      const values = [
+        { label: "No Prazo", value: onTimeCount, color: "#5aaa78" },
+        { label: "Atrasadas", value: lateCount, color: "#e05a5a" }
+      ];
+      const total = onTimeCount + lateCount;
+      let angle = -90;
+      const cx = 360, cy = 150, outer = 120, inner = 60;
+      const paths = values.map((item) => {
+        const slice = item.value / total * 360;
+        const start = angle;
+        const end = angle + slice;
+        angle = end;
+        const x1 = cx + outer * Math.cos(start * Math.PI / 180);
+        const y1 = cy + outer * Math.sin(start * Math.PI / 180);
+        const x2 = cx + outer * Math.cos(end * Math.PI / 180);
+        const y2 = cy + outer * Math.sin(end * Math.PI / 180);
+        const x3 = cx + inner * Math.cos(end * Math.PI / 180);
+        const y3 = cy + inner * Math.sin(end * Math.PI / 180);
+        const x4 = cx + inner * Math.cos(start * Math.PI / 180);
+        const y4 = cy + inner * Math.sin(start * Math.PI / 180);
+        const largeArc = slice > 180 ? 1 : 0;
+        return `<path d="M ${x1},${y1} A ${outer},${outer} 0 ${largeArc},1 ${x2},${y2} L ${x3},${y3} A ${inner},${inner} 0 ${largeArc},0 ${x4},${y4} Z" fill="${item.color}" data-key="${item.label}" data-label="${item.label}: ${item.value}" style="cursor:pointer" />`;
+      }).join("");
+      const centerText = `
+        <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-size="48" font-weight="700" fill="#24364d">${total}</text>
+        <text x="${cx}" y="${cy + 20}" text-anchor="middle" font-size="16" fill="#64748b">Concluídas</text>
+      `;
+      $("#ontime-rate-chart").innerHTML = svgWrap(paths + centerText, 320);
+      $("#ontime-rate-chart").querySelectorAll("[data-key]").forEach((el) => {
+        el.addEventListener("mousemove", (event) => showTip(event, el.dataset.label));
+        el.addEventListener("mouseleave", hideTip);
+        el.addEventListener("click", () => {
+          const taskList = el.dataset.key === "No Prazo" 
+            ? closedRows.filter((task) => task.onTime)
+            : closedRows.filter((task) => !task.onTime);
+          openTaskList(taskList, `Tarefas ${el.dataset.key}`);
+        });
+      });
+    }
+
+    function renderSprintPerformance(rows) {
+      const bySprint = {};
+      rows.forEach((task) => {
+        const sprint = task.sprint || "Sem sprint";
+        if (!bySprint[sprint]) bySprint[sprint] = { total: 0, closed: 0 };
+        bySprint[sprint].total++;
+        if (task.closed) bySprint[sprint].closed++;
+      });
+      const sprints = Object.keys(bySprint).sort().slice(-8);
+      if (!sprints.length) {
+        $("#sprint-performance-chart").innerHTML = emptyChart("Sem dados de sprint.");
+        return;
+      }
+      const maxVal = Math.max(...sprints.map((s) => bySprint[s].total));
+      const width = 720, height = 350, padding = { top: 20, right: 40, bottom: 60, left: 190 };
+      const chartH = height - padding.top - padding.bottom;
+      const rowH = chartH / sprints.length;
+      const barH = Math.min(24, rowH - 8);
+      const bars = sprints.map((sprint, i) => {
+        const y = padding.top + i * rowH;
+        const totalW = (bySprint[sprint].total / maxVal) * (width - padding.left - padding.right);
+        const closedW = (bySprint[sprint].closed / maxVal) * (width - padding.left - padding.right);
+        const sprintLabel = truncateLabel(sprint, 22);
+        return `
+          <text x="${padding.left - 10}" y="${y + rowH / 2 + 5}" text-anchor="end" font-size="14" fill="#334155" title="${escapeHtml(sprint)}">${escapeHtml(sprintLabel)}</text>
+          <rect x="${padding.left}" y="${y + (rowH - barH) / 2}" width="${totalW}" height="${barH}" rx="4" fill="#94a3b8" data-key="${escapeHtml(sprint)}" data-label="${sprint}: ${bySprint[sprint].total} tarefas" style="cursor:pointer" />
+          <rect x="${padding.left}" y="${y + (rowH - barH) / 2}" width="${closedW}" height="${barH}" rx="4" fill="var(--green)" data-key="${escapeHtml(sprint)}" data-label="${sprint}: ${bySprint[sprint].closed} concluídas" style="cursor:pointer" />
+          <text x="${padding.left + totalW + 8}" y="${y + rowH / 2 + 5}" font-size="13" fill="#64748b">${bySprint[sprint].closed}/${bySprint[sprint].total}</text>
+        `;
+      }).join("");
+      $("#sprint-performance-chart").innerHTML = svgWrap(bars, height);
+      $("#sprint-performance-chart").querySelectorAll("[data-key]").forEach((el) => {
+        el.addEventListener("mousemove", (event) => showTip(event, el.dataset.label));
+        el.addEventListener("mouseleave", hideTip);
+        el.addEventListener("click", () => {
+          const taskList = currentFiltered.filter((task) => (task.sprint || "Sem sprint") === el.dataset.key);
+          openTaskList(taskList, `Sprint: ${el.dataset.key}`);
+        });
+      });
+    }
+
+    function renderBottlenecksTable(rows) {
+      const openRows = rows.filter((task) => !task.closed && task.created);
+      if (!openRows.length) {
+        $("#bottlenecks-table").innerHTML = `<div class="empty">Nenhuma tarefa em aberto.</div>`;
+        currentBottlenecks = [];
+        return;
+      }
+      // Filtra tarefas abertas há mais de 30 dias
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+      const bottlenecks = openRows.filter((task) => new Date(task.created) < thirtyDaysAgo);
+      
+      if (!bottlenecks.length) {
+        $("#bottlenecks-table").innerHTML = `<div class="empty">Nenhuma tarefa aberta há mais de 30 dias.</div>`;
+        currentBottlenecks = [];
+        return;
+      }
+      
+      const sorted = bottlenecks.slice().sort((a, b) => a.created.localeCompare(b.created));
+      currentBottlenecks = sorted;
+      $("#bottlenecks-table").innerHTML = `
+        <table>
+          <thead><tr><th>Tarefa</th><th>Título</th><th style="white-space:nowrap;min-width:95px">Criada em<br><span style="font-weight:400;font-size:10px;opacity:0.7">(ano-mês-dia)</span></th><th style="white-space:nowrap">Dias Aberta</th><th>Responsável</th></tr></thead>
+          <tbody>
+            ${sorted.map((task) => {
+              const daysOpen = Math.floor((new Date() - new Date(task.created)) / (1000 * 60 * 60 * 24));
+              return `
+                <tr>
+                  <td>${task.url ? `<a href="${escapeHtml(task.url)}" target="_blank" rel="noopener">#${escapeHtml(task.id)}</a>` : escapeHtml(task.id)}</td>
+                  <td>${escapeHtml(task.title)}</td>
+                  <td style="white-space:nowrap">${escapeHtml(task.created)}</td>
+                  <td style="font-weight:700;color:#e05a5a">${daysOpen} dias</td>
+                  <td>${escapeHtml(task.assignee || "-")}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function buildUserTableHtml(users, statusCode) {
+      const rows = users.map((item) => {
+        const userSearchUrl = `${REDMINE_BASE_URL}/users?utf8=%E2%9C%93&status=${statusCode}&group_id=&name=${encodeURIComponent(item.login)}&encoding=ISO-8859-1`;
+        const lastLoginFmt = item.lastLogin ? item.lastLogin.replace('T', ' ') : 'Nunca';
+        const daysDisplay = item.daysInactive !== null ? `${item.daysInactive} dias` : '—';
+        return `
+          <tr>
+            <td><a href="${userSearchUrl}" target="_blank" rel="noopener">${escapeHtml(item.login)}</a></td>
+            <td>${escapeHtml(item.name)}</td>
+            <td>${escapeHtml(item.email)}</td>
+            <td style="white-space:nowrap">${escapeHtml(lastLoginFmt)}</td>
+            <td style="font-weight:700;color:#e05a5a">${escapeHtml(daysDisplay)}</td>
+          </tr>
+        `;
+      }).join("");
+      return `
+        <table>
+          <thead><tr><th>Login</th><th>Nome</th><th>E-mail</th><th style="white-space:nowrap">Última Conexão</th><th style="white-space:nowrap">Inativo</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function renderInactiveUsers(rows) {
+      if (!$("#inactive-users-table")) return;
+      // Cruza usuários inativos na API com responsáveis que têm tarefas no recorte.
+      const usersWithTasks = new Set();
+      rows.forEach((task) => {
+        const user = (task.assignee || "").trim();
+        if (user) usersWithTasks.add(user.toLowerCase());
+      });
+
+      function filterAndSort(usersPool) {
+        return usersPool
+          .filter((u) => usersWithTasks.has((u.name || "").trim().toLowerCase()))
+          .map((u) => ({
+            login: u.login,
+            name: u.name,
+            email: u.email,
+            lastLogin: u.last_login,
+            daysInactive: u.days_inactive,
+          }))
+          .sort((a, b) => {
+            if (a.daysInactive === null && b.daysInactive === null) return 0;
+            if (a.daysInactive === null) return -1;
+            if (b.daysInactive === null) return 1;
+            return b.daysInactive - a.daysInactive;
+          });
+      }
+
+      // Passo 2: cruza com USERS_ACTIVE e USERS_BLOCKED separadamente.
+      const activeInactive = filterAndSort(USERS_ACTIVE);
+      const blockedInactive = filterAndSort(USERS_BLOCKED);
+      currentActiveInactive = activeInactive;
+      currentBlockedInactive = blockedInactive;
+
+      $("#inactive-users-table").innerHTML = activeInactive.length
+        ? buildUserTableHtml(activeInactive, 1)
+        : `<div class="empty">Nenhum usuário ativo sem atividade há mais de 40 dias.</div>`;
+
+      $("#blocked-users-table").innerHTML = blockedInactive.length
+        ? buildUserTableHtml(blockedInactive, 3)
+        : `<div class="empty">Nenhum usuário bloqueado sem atividade há mais de 40 dias.</div>`;
+    }
+
+    function renderOpenWorkloadBars(rows) {
+      const openRows = rows.filter((task) => !task.closed);
+      if (!openRows.length) {
+        $("#open-workload-bars").innerHTML = emptyChart("Nenhuma tarefa em aberto.");
+        return;
+      }
+      const values = countBy(openRows, (task) => task.assignee);
+      renderHorizontalBars($("#open-workload-bars"), values, {
+        left: 240,
+        rowH: 46,
+        onClick: (assignee) => openTaskList(openRows.filter((task) => task.assignee === assignee), `Tarefas abertas: ${assignee}`)
+      });
+    }
+
+    function renderAvgCompletionTimeByType(rows) {
+      const closedWithDates = rows.filter((task) => task.closed && task.created && task.done);
+      if (!closedWithDates.length) {
+        $("#avg-completion-bars").innerHTML = emptyChart("Sem dados de conclusão.");
+        return;
+      }
+      const byType = {};
+      closedWithDates.forEach((task) => {
+        const type = task.type || "Não informado";
+        const days = Math.floor((new Date(task.done) - new Date(task.created)) / (1000 * 60 * 60 * 24));
+        if (!byType[type]) byType[type] = { sum: 0, count: 0 };
+        byType[type].sum += days;
+        byType[type].count++;
+      });
+      const values = Object.keys(byType).map((type) => ({
+        label: type,
+        value: Math.round(byType[type].sum / byType[type].count)
+      })).sort((a, b) => b.value - a.value);
+      renderHorizontalBars($("#avg-completion-bars"), values, {
+        left: 240,
+        rowH: 46,
+        onClick: (type) => openTaskList(closedWithDates.filter((task) => (task.type || "Não informado") === type), `Tempo médio de conclusão: ${type}`)
+      });
+    }
+
+    function updateDashboard() {
+      currentFiltered = getFilteredRows();
+      const total = currentFiltered.length;
+      const closed = currentFiltered.filter((task) => task.closed).length;
+      const overdue = currentFiltered.filter((task) => task.overdue).length;
+      const onTimeRows = currentFiltered.filter((task) => task.onTime);
+      const openRows = currentFiltered.filter((task) => !task.closed && task.created);
+      const noDueDate = currentFiltered.filter((task) => !task.closed && !task.due).length;
+      const sixtyDaysAgo = new Date(new Date().getTime() - (60 * 24 * 60 * 60 * 1000));
+      const staleTasks = currentFiltered.filter((task) => !task.closed && task.updated && new Date(task.updated) < sixtyDaysAgo).length;
+      const suspendedTasks = currentFiltered.filter((task) => String(task.status || "").toLowerCase().includes("suspens")).length;
+      const avgAge = openRows.length > 0 
+        ? Math.round(openRows.reduce((sum, task) => sum + Math.floor((new Date() - new Date(task.created)) / (1000 * 60 * 60 * 24)), 0) / openRows.length)
+        : 0;
+      $("#kpi-total").textContent = total;
+      $("#kpi-total-hint").textContent = `atualizado em ${META.generated_at}`;
+      $("#kpi-closed").textContent = closed;
+      $("#kpi-overdue").textContent = overdue;
+      $("#kpi-on-time").textContent = fmtPct(pct(onTimeRows.length, closed));
+      $("#kpi-avg-age").textContent = `${avgAge} dias`;
+      $("#kpi-no-due").textContent = noDueDate;
+      $("#kpi-stale").textContent = staleTasks;
+      $("#kpi-suspended").textContent = suspendedTasks;
+      renderCoordinationBars(currentFiltered);
+      renderVolumeChart();
+      renderDonut(currentFiltered);
+      renderTypeBars(currentFiltered);
+      renderStatusBars(currentFiltered);
+      renderOnTimeRateChart(currentFiltered);
+      renderSprintPerformance(currentFiltered);
+      renderBottlenecksTable(currentFiltered);
+      renderOpenWorkloadBars(currentFiltered);
+      renderAvgCompletionTimeByType(currentFiltered);
+      renderAssigneeBars(currentFiltered);
+      renderOverdueByProject(currentFiltered);
+      renderOverdueByType(currentFiltered);
+      renderOverdueByEntry(currentFiltered);
+      renderEvidenceTable(currentFiltered);
+      renderInactiveUsers(currentFiltered);
+    }
+
+    function taskStatusPill(task) {
+      if (task.overdue) return `<span class="status-pill red">Em atraso</span>`;
+      if (task.closed) return `<span class="status-pill green">Encerrada</span>`;
+      return `<span class="status-pill blue">Em andamento</span>`;
+    }
+
+    function tableForTasks(rows) {
+      if (!rows.length) return `<div class="empty">Nenhuma tarefa encontrada para o recorte selecionado.</div>`;
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Número</th><th>Título</th><th>Coordenação</th><th>Subprojeto</th><th>Atribuição</th><th>Tipo</th><th>Situação</th><th style="white-space:nowrap;min-width:95px">Criada em<br><span style="font-weight:400;font-size:10px;opacity:0.7">(ano-mês-dia)</span></th><th style="white-space:nowrap;min-width:95px">Início<br><span style="font-weight:400;font-size:10px;opacity:0.7">(ano-mês-dia)</span></th><th style="white-space:nowrap;min-width:95px">Conclusão<br><span style="font-weight:400;font-size:10px;opacity:0.7">(ano-mês-dia)</span></th><th style="white-space:nowrap;min-width:100px">Data prevista<br><span style="font-weight:400;font-size:10px;opacity:0.7">(ano-mês-dia)</span></th><th style="white-space:nowrap">Dias Aberta</th><th style="white-space:nowrap">Dias em atraso</th><th>Evidência</th></tr>
+            </thead>
+            <tbody>
+              ${rows.map((task) => {
+                const daysOpen = task.created ? Math.floor((new Date() - new Date(task.created)) / (1000 * 60 * 60 * 24)) : 0;
+                return `
+                  <tr>
+                    <td>${task.url ? `<a href="${escapeHtml(task.url)}" target="_blank" rel="noopener">#${escapeHtml(task.id)}</a>` : escapeHtml(task.id)}</td>
+                    <td>${escapeHtml(task.title)}</td>
+                    <td>${escapeHtml(task.coordination)}</td>
+                    <td>${escapeHtml(task.subitem)}</td>
+                    <td>${escapeHtml(task.assignee)}</td>
+                    <td>${escapeHtml(task.type)}</td>
+                    <td>${taskStatusPill(task)}<br><span class="note">${escapeHtml(task.status)}</span></td>
+                    <td style="white-space:nowrap">${escapeHtml(task.created || "-")}</td>
+                    <td style="white-space:nowrap">${escapeHtml(task.start || "-")}</td>
+                    <td style="white-space:nowrap">${escapeHtml(task.done || "-")}</td>
+                    <td style="white-space:nowrap">${escapeHtml(task.due || "Não informado")}</td>
+                    <td style="white-space:nowrap;${daysOpen > 0 ? "font-weight:700;color:#e05a5a" : ""}">${daysOpen > 0 ? daysOpen + " dias" : "-"}</td>
+                    <td>${task.lateDays > 0 ? task.lateDays : ""}</td>
+                    <td>${escapeHtml(task.evidence || "Link da tarefa")}</td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function openTaskList(rows, title) {
+      currentModalRows = rows;
+      $("#modal-title").textContent = title;
+      $("#modal-subtitle").textContent = `${rows.length} tarefa(s) no recorte selecionado`;
+      $("#modal-body").innerHTML = tableForTasks(rows);
+      $("#task-modal").classList.add("open");
+    }
+
+    function closeModal() {
+      $("#task-modal").classList.remove("open");
+    }
+
+    let currentActiveInactive = [];
+    let currentBlockedInactive = [];
+
+    function usersToCsv(users, situacao) {
+      const headers = ["Login", "Nome", "E-mail", "Última Conexão", "Dias Inativo", "Situação"];
+      const lines = [headers.join(";")];
+      users.forEach((u) => {
+        const lastLogin = u.lastLogin ? u.lastLogin.replace('T', ' ') : 'Nunca';
+        const days = u.daysInactive !== null ? u.daysInactive : '';
+        const values = [u.login, u.name, u.email, lastLogin, days, situacao]
+          .map((v) => `"${String(v ?? "").replaceAll('"', '""')}"`);
+        lines.push(values.join(";"));
+      });
+      return lines.join("\n");
+    }
+
+    function downloadUsersCsv(users, situacao, filename) {
+      const blob = new Blob([usersToCsv(users, situacao)], {type: "text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function rowsToCsv(rows) {
+      const headers = ["Numero","Titulo","Coordenacao","Subprojeto","Atribuicao","Tipo","Situacao","Criada em","Inicio","Conclusao","Data prevista","Dias aberta","Dias em atraso","URL","Evidencia"];
+      const lines = [headers.join(";")];
+      rows.forEach((task) => {
+        const daysOpen = task.created ? Math.floor((new Date() - new Date(task.created)) / (1000 * 60 * 60 * 24)) : 0;
+        const values = [task.id, task.title, task.coordination, task.subitem, task.assignee, task.type, task.status, task.created, task.start, task.done, task.due, daysOpen, task.lateDays, task.url, task.evidence]
+          .map((value) => `"${String(value ?? "").replaceAll('"','""')}"`);
+        lines.push(values.join(";"));
+      });
+      return lines.join("\n");
+    }
+
+    function downloadCsv(rows, filename) {
+      const blob = new Blob([rowsToCsv(rows)], {type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initFilters();
+      updateDashboard();
+      document.querySelectorAll(".kpi").forEach((card) => {
+        card.addEventListener("click", () => {
+          const key = card.dataset.list;
+          const titleMap = {
+            all:"Total de tarefas",
+            closed:"Tarefas encerradas",
+            overdue:"Tarefas em atraso",
+            onTime:"Tarefas entregues no prazo",
+            noDueDate:"Tarefas sem prazo definido",
+            stale:"Tarefas com mais de 60 dias sem atualização",
+            suspended:"Tarefas suspensas"
+          };
+          openTaskList(filterByListKey(currentFiltered, key), titleMap[key] || "Tarefas");
+        });
+      });
+      $("#download-filtered").addEventListener("click", () => downloadCsv(currentFiltered, "tarefas_filtradas_v6.csv"));
+      $("#download-inactive-active")?.addEventListener("click", () => downloadUsersCsv(currentActiveInactive, "Ativo", "usuarios_ativos_inativos_v6.csv"));
+      $("#download-inactive-blocked")?.addEventListener("click", () => downloadUsersCsv(currentBlockedInactive, "Bloqueado", "usuarios_bloqueados_inativos_v6.csv"));
+      $("#view-bottlenecks").addEventListener("click", () => openTaskList(currentBottlenecks, "Gargalos - Tarefas abertas há mais de 30 dias"));
+      $("#view-evidence").addEventListener("click", () => openTaskList(currentEvidence, "Rastreabilidade - Tarefas com Evidência"));
+      $("#print-dashboard").addEventListener("click", () => {
+        document.body.classList.add("printing-dashboard");
+        window.print();
+        document.body.classList.remove("printing-dashboard");
+      });
+      $("#modal-close").addEventListener("click", closeModal);
+      $("#task-modal").addEventListener("click", (event) => { if (event.target.id === "task-modal") closeModal(); });
+      $("#modal-csv").addEventListener("click", () => downloadCsv(currentModalRows, "listagem_tarefas_v6.csv"));
+      $("#modal-print").addEventListener("click", () => {
+        document.body.classList.add("printing-list");
+        window.print();
+        document.body.classList.remove("printing-list");
+      });
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
+    });
+  </script>
 </body>
 </html>
